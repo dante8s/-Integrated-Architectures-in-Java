@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Register as coach')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5" style="max-width: 720px">
+    <h1 class="mb-2">Register as coach</h1>
+    <p class="text-muted mb-4">After registration an administrator checks your profile.
+        You can log in once it is approved.</p>
+
+    <!-- th:object binds the form to the "form" model attribute; *{field} refers to its fields.
+         th:field sets id, name and value; th:errorclass adds "is-invalid" when the field has an error. -->
+    <form th:action="@{/register/coach}" th:object="${form}" method="post" novalidate>
+
+        <h5 class="mt-2">Account</h5>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label for="firstName" class="form-label">First name</label>
+                <input type="text" class="form-control" th:field="*{firstName}" th:errorclass="is-invalid">
+                <div class="invalid-feedback" th:errors="*{firstName}"></div>
+            </div>
+            <div class="col-md-6">
+                <label for="lastName" class="form-label">Last name</label>
+                <input type="text" class="form-control" th:field="*{lastName}" th:errorclass="is-invalid">
+                <div class="invalid-feedback" th:errors="*{lastName}"></div>
+            </div>
+            <div class="col-12">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" th:field="*{email}" th:errorclass="is-invalid">
+                <div class="invalid-feedback" th:errors="*{email}"></div>
+            </div>
+            <div class="col-md-6">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" th:field="*{password}" th:errorclass="is-invalid">
+                <div class="invalid-feedback" th:errors="*{password}"></div>
+            </div>
+            <div class="col-md-6">
+                <label for="confirmPassword" class="form-label">Repeat password</label>
+                <input type="password" class="form-control" th:field="*{confirmPassword}"
+                       th:errorclass="is-invalid">
+                <div class="invalid-feedback" th:errors="*{confirmPassword}"></div>
+            </div>
+        </div>
+
+        <h5 class="mt-4">Coach profile</h5>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label for="experienceYears" class="form-label">Experience (years)</label>
+                <input type="number" min="0" class="form-control" th:field="*{experienceYears}"
+                       th:errorclass="is-invalid">
+                <div class="invalid-feedback" th:errors="*{experienceYears}"></div>
+            </div>
+            <div class="col-md-4">
+                <label for="hourlyPrice" class="form-label">Price per hour</label>
+                <input type="number" min="0" step="0.01" class="form-control" th:field="*{hourlyPrice}"
+                       th:errorclass="is-invalid">
+                <div class="invalid-feedback" th:errors="*{hourlyPrice}"></div>
+            </div>
+            <div class="col-md-4">
+                <label for="city" class="form-label">City</label>
+                <input type="text" class="form-control" th:field="*{city}" th:errorclass="is-invalid">
+                <div class="invalid-feedback" th:errors="*{city}"></div>
+            </div>
+            <div class="col-12">
+                <div class="form-check">
+                    <!-- For a boolean th:field also renders a hidden "_online" input,
+                         so an unchecked box is sent as false -->
+                    <input type="checkbox" class="form-check-input" th:field="*{online}">
+                    <label class="form-check-label" th:for="${#ids.prev('online')}">I also train online</label>
+                </div>
+            </div>
+            <div class="col-12">
+                <span class="form-label d-block">Sports</span>
+                <!-- One checkbox per sport; the checked values are collected into the sportIds set -->
+                <div class="form-check form-check-inline" th:each="sport : ${sports}">
+                    <input type="checkbox" class="form-check-input" th:field="*{sportIds}" th:value="${sport.id}">
+                    <label class="form-check-label" th:for="${#ids.prev('sportIds')}"
+                           th:text="${sport.name}">Tennis</label>
+                </div>
+                <div class="text-danger small" th:if="${#fields.hasErrors('sportIds')}"
+                     th:errors="*{sportIds}"></div>
+            </div>
+            <div class="col-12">
+                <label for="bio" class="form-label">About you</label>
+                <textarea class="form-control" rows="4" th:field="*{bio}" th:errorclass="is-invalid"></textarea>
+                <div class="invalid-feedback" th:errors="*{bio}"></div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-4">Register</button>
+    </form>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

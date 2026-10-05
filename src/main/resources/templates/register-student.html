@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Register as student')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5" style="max-width: 560px">
+    <h1 class="mb-4">Register as student</h1>
+
+    <form th:action="@{/register/student}" th:object="${form}" method="post" novalidate>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label for="firstName" class="form-label">First name</label>
+                <input type="text" class="form-control" th:field="*{firstName}" th:errorclass="is-invalid">
+                <div class="invalid-feedback" th:errors="*{firstName}"></div>
+            </div>
+            <div class="col-md-6">
+                <label for="lastName" class="form-label">Last name</label>
+                <input type="text" class="form-control" th:field="*{lastName}" th:errorclass="is-invalid">
+                <div class="invalid-feedback" th:errors="*{lastName}"></div>
+            </div>
+            <div class="col-12">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" th:field="*{email}" th:errorclass="is-invalid">
+                <div class="invalid-feedback" th:errors="*{email}"></div>
+            </div>
+            <div class="col-md-6">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" th:field="*{password}" th:errorclass="is-invalid">
+                <div class="invalid-feedback" th:errors="*{password}"></div>
+            </div>
+            <div class="col-md-6">
+                <label for="confirmPassword" class="form-label">Repeat password</label>
+                <input type="password" class="form-control" th:field="*{confirmPassword}"
+                       th:errorclass="is-invalid">
+                <div class="invalid-feedback" th:errors="*{confirmPassword}"></div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-4">Register</button>
+    </form>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
