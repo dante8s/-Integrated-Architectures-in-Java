@@ -8,7 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 public class PasswordConfig {
 
-    // One shared encoder for the whole app: registration now, login (step 4) later.
+    // One shared encoder for the whole app: hashing on registration, checking on login.
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

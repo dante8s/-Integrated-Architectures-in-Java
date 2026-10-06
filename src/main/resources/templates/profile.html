@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('My page')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5" style="max-width: 720px">
+    <!-- welcome comes as a flash attribute right after registration -->
+    <div th:if="${welcome}" class="alert alert-success">
+        Registration complete! Welcome to SportCoach.
+    </div>
+
+    <h1 class="mb-4" th:text="'Hi, ' + ${me.firstName} + '!'">Hi, Name!</h1>
+
+    <dl class="row">
+        <dt class="col-sm-3">Email</dt>
+        <dd class="col-sm-9" th:text="${me.username}">email@example.com</dd>
+        <dt class="col-sm-3">Role</dt>
+        <dd class="col-sm-9" th:text="${me.role}">STUDENT</dd>
+    </dl>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">My bookings</h5>
+            <p class="card-text text-muted">You have no bookings yet.</p>
+            <a th:href="@{/}" class="btn btn-primary">Find a coach</a>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

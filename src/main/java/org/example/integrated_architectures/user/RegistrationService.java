@@ -7,8 +7,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Locale;
-
 /**
  * Registration of students and coaches. Used by the Thymeleaf controller now
  * and by the REST API later, so all rules live here, not in controllers.
@@ -36,7 +34,7 @@ public class RegistrationService {
      * Student can log in right away, so the status is ACTIVE.
      */
     public User registerStudent(StudentRegistrationForm form) {
-        String email = normalizeEmail(form.getEmail());
+        String email = Emails.normalize(form.getEmail());
         ensureEmailIsFree(email);
         ensurePasswordsMatch(form.getPassword(), form.getConfirmPassword());
 
@@ -56,7 +54,7 @@ public class RegistrationService {
      * Both rows are saved in one transaction: if the profile fails, the user is not saved either.
      */
     public User registerCoach(CoachRegistrationForm form) {
-        String email = normalizeEmail(form.getEmail());
+        String email = Emails.normalize(form.getEmail());
         ensureEmailIsFree(email);
         ensurePasswordsMatch(form.getPassword(), form.getConfirmPassword());
 
@@ -77,11 +75,6 @@ public class RegistrationService {
         coachProfileRepository.save(profile);
 
         return user;
-    }
-
-    // "  Ivan@Mail.COM " and "ivan@mail.com" must be the same account.
-    private String normalizeEmail(String email) {
-        return email.trim().toLowerCase(Locale.ROOT);
     }
 
     private void ensureEmailIsFree(String email) {

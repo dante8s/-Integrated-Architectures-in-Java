@@ -11,6 +11,26 @@
     <a class="btn btn-outline-primary" th:href="@{/register/coach}">I am a coach</a>
 </main>
 
+<!-- Pops up once after coach registration (coachPending is a flash attribute from the redirect) -->
+<div th:if="${coachPending}" class="modal fade" id="coachPendingModal" tabindex="-1"
+     aria-labelledby="coachPendingTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center p-4">
+            <div class="display-1 mb-3" aria-hidden="true">&#x23F3;</div>
+            <h2 class="h4" id="coachPendingTitle">Please wait for verification</h2>
+            <p class="text-muted">Your coach profile was sent to the administrator.
+                You will be able to log in as soon as it is approved.</p>
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+        </div>
+    </div>
+</div>
+<script th:if="${coachPending}">
+    // Bootstrap JS is loaded with defer, so wait until the page is ready
+    document.addEventListener('DOMContentLoaded', () => {
+        new bootstrap.Modal(document.getElementById('coachPendingModal')).show();
+    });
+</script>
+
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>
 </html>
