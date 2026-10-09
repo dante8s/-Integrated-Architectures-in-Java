@@ -14,6 +14,8 @@
     </div>
     <div th:if="${param.rejected}" class="alert alert-danger">
         Your coach profile was rejected by the administrator.
+        <!-- Flash attribute from LoginFailureHandler. th:text escapes HTML, so the admin's text cannot inject markup (XSS). -->
+        <div th:if="${rejectionReason}" class="mt-2">Reason: <span th:text="${rejectionReason}"></span></div>
     </div>
     <div th:if="${param.logout}" class="alert alert-success">You have been logged out.</div>
 

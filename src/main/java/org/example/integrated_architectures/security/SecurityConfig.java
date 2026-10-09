@@ -2,13 +2,11 @@ package org.example.integrated_architectures.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.authentication.LockedException;
+import org.springframework.security.authentication.AccountStatusUserDetailsChecker;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.ExceptionMappingAuthenticationFailureHandler;
-
-import java.util.Map;
 
 /**
  * Security for the Thymeleaf pages: HTTP session + form login.
@@ -18,7 +16,8 @@ import java.util.Map;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain webSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain webSecurityFilterChain(HttpSecurity http,
+                                                     LoginFailureHandler loginFailureHandler) throws Exception {
         http
                 // Rules are checked top to bottom, the first matching one wins.
                 .authorizeHttpRequests(auth -> auth
@@ -31,7 +30,7 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/login")              // our own page instead of the generated one
                         .usernameParameter("email")       // name of the input in login.html
-                        .failureHandler(loginFailureHandler())
+                        .failureHandler(loginFailureHandler)
                         .permitAll())
                 // POST /logout (with CSRF token) -> redirect to /login?logout
                 .logout(logout -> logout.permitAll());
@@ -40,15 +39,18 @@ public class SecurityConfig {
     }
 
     /**
-     * Sends the user back to /login with a different parameter for each reason,
-     * so login.html can show a specific message.
+     * Checks email + password with our AppUserDetailsService and BCrypt.
+     * By default Spring checks the account status (enabled/locked) BEFORE the password,
+     * so anyone who knows a coach's email would see "pending"/"rejected" (and now the reason).
+     * Here the status is checked only AFTER a correct password.
      */
-    private ExceptionMappingAuthenticationFailureHandler loginFailureHandler() {
-        var handler = new ExceptionMappingAuthenticationFailureHandler();
-        handler.setExceptionMappings(Map.of(
-                DisabledException.class.getName(), "/login?pending",
-                LockedException.class.getName(), "/login?rejected"));
-        handler.setDefaultFailureUrl("/login?error");   // wrong email or password
-        return handler;
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider(AppUserDetailsService userDetailsService,
+                                                            PasswordEncoder passwordEncoder) {
+        var provider = new DaoAuthenticationProvider(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder);
+        provider.setPreAuthenticationChecks(user -> { });                           // nothing before the password
+        provider.setPostAuthenticationChecks(new AccountStatusUserDetailsChecker()); // enabled, locked, expired
+        return provider;
     }
 }

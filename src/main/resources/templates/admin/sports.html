@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Sports')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5" style="max-width: 900px">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Sports</h1>
+        <a th:href="@{/admin/sports/new}" class="btn btn-primary">Add sport</a>
+    </div>
+
+    <!-- Flash attributes from AdminSportController (live for one request after the redirect) -->
+    <div th:if="${success}" class="alert alert-success" th:text="${success}">Done</div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}">Error</div>
+
+    <p th:if="${sports.isEmpty()}" class="text-muted">No sports yet.</p>
+
+    <table th:unless="${sports.isEmpty()}" class="table align-middle">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th class="text-end">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="sport : ${sports}">
+            <td class="fw-semibold" th:text="${sport.name}">Tennis</td>
+            <td class="text-muted" th:text="${sport.description} ?: '-'">Description</td>
+            <td class="text-end text-nowrap">
+                <a th:href="@{/admin/sports/{id}/edit(id=${sport.id})}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                <!-- Delete changes data, so it is a POST form (with CSRF token), not a link.
+                     confirm() is a browser dialog: "Cancel" stops the submit. -->
+                <form th:action="@{/admin/sports/{id}/delete(id=${sport.id})}" method="post" class="d-inline"
+                      onsubmit="return confirm('Delete this sport?')">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

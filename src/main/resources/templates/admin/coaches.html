@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Coach approval')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5" style="max-width: 900px">
+    <h1 class="mb-4">Coaches waiting for approval</h1>
+
+    <!-- Flash attributes from AdminCoachController (live for one request after the redirect) -->
+    <div th:if="${success}" class="alert alert-success" th:text="${success}">Done</div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}">Error</div>
+
+    <p th:if="${coaches.isEmpty()}" class="text-muted">No coaches are waiting for approval.</p>
+
+    <div th:each="coach : ${coaches}" class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title" th:text="${coach.user.firstName} + ' ' + ${coach.user.lastName}">Ivan Petrenko</h5>
+            <h6 class="card-subtitle mb-3 text-muted" th:text="${coach.user.email}">coach@example.com</h6>
+
+            <dl class="row mb-3">
+                <dt class="col-sm-3">Sports</dt>
+                <!-- coach.sports.![name] = list of the names of all sports (SpEL projection) -->
+                <dd class="col-sm-9" th:text="${#strings.listJoin(coach.sports.![name], ', ')}">Tennis, Yoga</dd>
+                <dt class="col-sm-3">Experience</dt>
+                <dd class="col-sm-9" th:text="${coach.experienceYears} + ' years'">5 years</dd>
+                <dt class="col-sm-3">Price</dt>
+                <dd class="col-sm-9" th:text="${coach.hourlyPrice} + ' / hour'">25.00 / hour</dd>
+                <dt class="col-sm-3">Where</dt>
+                <dd class="col-sm-9">
+                    <span th:text="${coach.city} ?: 'no city'">Kyiv</span>
+                    <span th:if="${coach.online}" class="badge text-bg-info ms-1">online</span>
+                </dd>
+                <dt class="col-sm-3">About</dt>
+                <dd class="col-sm-9" th:text="${coach.bio} ?: '-'">Bio</dd>
+            </dl>
+
+            <div class="d-flex gap-2 align-items-start">
+                <!-- th:action builds the URL with the id and adds the CSRF token -->
+                <form th:action="@{/admin/coaches/{id}/approve(id=${coach.id})}" method="post">
+                    <button type="submit" class="btn btn-success">Approve</button>
+                </form>
+
+                <!-- name="reason" must match @RequestParam String reason in AdminCoachController -->
+                <form th:action="@{/admin/coaches/{id}/reject(id=${coach.id})}" method="post" class="flex-grow-1">
+                    <div class="d-flex gap-2">
+                        <textarea name="reason" class="form-control" rows="2" required maxlength="500"
+                                  placeholder="Reason"></textarea>
+                        <button type="submit" class="btn btn-danger">Reject</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
