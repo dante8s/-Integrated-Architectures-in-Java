@@ -2,6 +2,7 @@ package org.example.integrated_architectures.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AccountStatusUserDetailsChecker;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -22,6 +23,9 @@ public class SecurityConfig {
                 // Rules are checked top to bottom, the first matching one wins.
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/register/**", "/login", "/error").permitAll()
+                        // Public catalog: guests can browse coaches. "/coaches/*" = one level only,
+                        // so future actions like /coaches/{id}/book will still need a login.
+                        .requestMatchers(HttpMethod.GET, "/coaches", "/coaches/*").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         // Must be the last rule: everything not listed above needs a logged-in user.

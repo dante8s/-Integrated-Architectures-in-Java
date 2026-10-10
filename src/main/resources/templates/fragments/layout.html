@@ -17,6 +17,10 @@
 <nav th:fragment="navbar" class="navbar navbar-expand navbar-dark bg-dark">
     <div class="container">
         <a class="navbar-brand" th:href="@{/}">SportCoach</a>
+        <ul class="navbar-nav">
+            <!-- For everybody, guests included -->
+            <li class="nav-item"><a class="nav-link" th:href="@{/coaches}">Coaches</a></li>
+        </ul>
         <ul class="navbar-nav ms-auto align-items-center">
             <!-- Guests: register + log in -->
             <li class="nav-item" sec:authorize="isAnonymous()">

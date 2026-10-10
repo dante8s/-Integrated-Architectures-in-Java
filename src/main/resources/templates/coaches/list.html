@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Coaches')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5">
+    <h1 class="mb-4">Find a coach</h1>
+
+    <!-- method="get": the filter goes to the URL (?sportId=..&name=..&minExperience=..).
+         No CSRF token is needed for GET. The names must match the fields of CoachSearchFilter. -->
+    <form th:action="@{/coaches}" method="get" class="row g-2 align-items-end mb-4">
+        <div class="col-md-4">
+            <label for="sportId" class="form-label">Sport</label>
+            <select id="sportId" name="sportId" class="form-select">
+                <option value="">Any sport</option>
+                <!-- th:selected keeps the chosen sport after the page reloads -->
+                <option th:each="sport : ${sports}" th:value="${sport.id}" th:text="${sport.name}"
+                        th:selected="${filter.sportId == sport.id}">Tennis</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label for="name" class="form-label">Coach name</label>
+            <input id="name" name="name" type="text" class="form-control" th:value="${filter.name}"
+                   placeholder="e.g. Ivan">
+        </div>
+        <div class="col-md-2">
+            <label for="minExperience" class="form-label">Experience from</label>
+            <input id="minExperience" name="minExperience" type="number" min="0" class="form-control"
+                   th:value="${filter.minExperience}" placeholder="years">
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-grow-1">Search</button>
+            <a th:href="@{/coaches}" class="btn btn-outline-secondary" title="Reset filters">&times;</a>
+        </div>
+    </form>
+
+    <!-- coaches is a Page<CoachView>: .content = coaches of this page, .totalElements = all found -->
+    <p class="text-muted" th:text="'Found: ' + ${coaches.totalElements}">Found: 12</p>
+    <p th:if="${coaches.content.isEmpty()}" class="text-muted">No coaches match the filter.</p>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        <div class="col" th:each="coach : ${coaches.content}">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title" th:text="${coach.fullName}">Ivan Petrenko</h5>
+                    <div class="mb-2">
+                        <span th:each="sportName : ${coach.sportNames}" class="badge text-bg-secondary me-1"
+                              th:text="${sportName}">Tennis</span>
+                    </div>
+                    <p class="mb-1" th:text="${coach.experienceYears} + ' years of experience'">5 years of experience</p>
+                    <p class="mb-1 fw-semibold" th:text="${coach.hourlyPrice} + ' / hour'">25.00 / hour</p>
+                    <p class="mb-2 text-muted small">
+                        <span th:text="${coach.city} ?: 'no city'">Kyiv</span>
+                        <span th:if="${coach.online}" class="badge text-bg-info ms-1">online</span>
+                    </p>
+                    <!-- abbreviate: cut a long bio to 120 characters with "..." -->
+                    <p class="card-text small" th:if="${coach.bio}"
+                       th:text="${#strings.abbreviate(coach.bio, 120)}">Short bio</p>
+                </div>
+                <div class="card-footer bg-transparent border-0 pb-3">
+                    <a th:href="@{/coaches/{id}(id=${coach.id})}" class="btn btn-outline-primary btn-sm">View profile</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination: only when there is more than one page.
+         Page numbers in Spring Data start from 0, for people we show i + 1.
+         The current filter is repeated in every link, otherwise page 2 would lose it. -->
+    <nav th:if="${coaches.totalPages > 1}" class="mt-4" aria-label="Pages">
+        <ul class="pagination justify-content-center">
+            <li th:each="i : ${#numbers.sequence(0, coaches.totalPages - 1)}" class="page-item"
+                th:classappend="${i == coaches.number} ? 'active'">
+                <a class="page-link" th:text="${i + 1}"
+                   th:href="@{/coaches(page=${i}, sportId=${filter.sportId}, name=${filter.name},
+                                       minExperience=${filter.minExperience})}">1</a>
+            </li>
+        </ul>
+    </nav>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

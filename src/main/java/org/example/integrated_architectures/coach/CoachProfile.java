@@ -13,6 +13,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import org.example.integrated_architectures.sport.Sport;
 import org.example.integrated_architectures.user.User;
+import org.hibernate.annotations.BatchSize;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -47,6 +48,9 @@ public class CoachProfile {
     @Column(name = "rejection_reason", length = 500)
     private String rejectionReason;
 
+    // Catalog page: sports of all coaches on the page are loaded with ONE query
+    // (WHERE coach_profile_id IN (...)) instead of one query per coach (the N+1 problem).
+    @BatchSize(size = 20)
     @ManyToMany
     @JoinTable(
             name = "coach_profile_sports",
