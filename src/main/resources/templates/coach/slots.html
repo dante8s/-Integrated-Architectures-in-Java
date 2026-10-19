@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('My slots')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5" style="max-width: 900px">
+    <h1 class="mb-4">My slots</h1>
+
+    <!-- Flash attributes from CoachSlotController -->
+    <div th:if="${success}" class="alert alert-success" th:text="${success}">Done</div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}">Error</div>
+
+    <!-- ---------- add form ---------- -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="h5 card-title">Add a slot</h2>
+            <form th:action="@{/coach/slots}" th:object="${form}" method="post" novalidate>
+                <!-- Global errors: bindingResult.reject(...) in the controller (past time, overlap...) -->
+                <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger">
+                    <div th:each="err : ${#fields.globalErrors()}" th:text="${err}">Error</div>
+                </div>
+                <div class="row g-3 align-items-start">
+                    <div class="col-md-5">
+                        <label for="startsAt" class="form-label">Start</label>
+                        <!-- datetime-local sends "2026-10-20T10:00" -> @DateTimeFormat in SlotForm -->
+                        <input type="datetime-local" class="form-control" th:field="*{startsAt}" th:errorclass="is-invalid">
+                        <div class="invalid-feedback" th:errors="*{startsAt}"></div>
+                    </div>
+                    <div class="col-md-5">
+                        <label for="endsAt" class="form-label">End</label>
+                        <input type="datetime-local" class="form-control" th:field="*{endsAt}" th:errorclass="is-invalid">
+                        <div class="invalid-feedback" th:errors="*{endsAt}"></div>
+                    </div>
+                    <div class="col-md-2 d-grid">
+                        <!-- invisible label keeps the button on the same line as the inputs -->
+                        <label class="form-label invisible">Add</label>
+                        <button type="submit" class="btn btn-primary">Add</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ---------- list ---------- -->
+    <p th:if="${slots.isEmpty()}" class="text-muted">No upcoming slots. Add one so students can book you.</p>
+
+    <table th:unless="${slots.isEmpty()}" class="table align-middle">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Time</th>
+            <th class="text-end">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="slot : ${slots}">
+            <!-- #temporals formats LocalDateTime (built into Thymeleaf 3.1) -->
+            <td th:text="${#temporals.format(slot.startsAt, 'EEE, dd.MM.yyyy')}">Mon, 20.10.2026</td>
+            <td th:text="${#temporals.format(slot.startsAt, 'HH:mm')} + ' - ' + ${#temporals.format(slot.endsAt, 'HH:mm')}">10:00 - 11:00</td>
+            <td class="text-end">
+                <!-- POST with CSRF token; a slot with bookings is not deleted (flash "error") -->
+                <form th:action="@{/coach/slots/{id}/delete(id=${slot.id})}" method="post" class="d-inline"
+                      onsubmit="return confirm('Delete this slot?')">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

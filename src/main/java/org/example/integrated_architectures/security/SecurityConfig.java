@@ -28,6 +28,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/coaches", "/coaches/*").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+                        // "/coach/**" (coach's own pages) is not "/coaches/**" (public catalog).
+                        .requestMatchers("/coach/**").hasRole("COACH")
                         // Must be the last rule: everything not listed above needs a logged-in user.
                         .anyRequest().authenticated()
                 )

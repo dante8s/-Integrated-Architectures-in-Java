@@ -64,6 +64,13 @@ class SecurityTests {
         mockMvc.perform(get("/admin")).andExpect(status().isForbidden());
     }
 
+    // A student must not manage slots: /coach/** is for ROLE_COACH only.
+    @Test
+    @WithMockUser(roles = "STUDENT")
+    void studentGetsForbiddenOnCoachPages() throws Exception {
+        mockMvc.perform(get("/coach/slots")).andExpect(status().isForbidden());
+    }
+
     @Test
     void activeStudentCanLogIn() throws Exception {
         saveUser("student@test.local", Role.STUDENT, UserStatus.ACTIVE);
