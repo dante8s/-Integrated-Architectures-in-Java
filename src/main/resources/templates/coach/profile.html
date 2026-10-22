@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('My profile')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5" style="max-width: 800px">
+    <h1 class="mb-1">My profile</h1>
+    <p class="text-muted mb-4">Changes are visible in the coach catalog right after saving.</p>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}">Saved</div>
+
+    <!-- form: CoachProfileForm, already filled with the current values (CoachProfileService.getForm) -->
+    <form th:action="@{/coach/profile}" th:object="${form}" method="post" novalidate>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label for="experienceYears" class="form-label">Experience (years)</label>
+                <input type="number" min="0" class="form-control" th:field="*{experienceYears}"
+                       th:errorclass="is-invalid">
+                <div class="invalid-feedback" th:errors="*{experienceYears}"></div>
+            </div>
+            <div class="col-md-4">
+                <label for="hourlyPrice" class="form-label">Price per hour</label>
+                <input type="number" min="0" step="0.01" class="form-control" th:field="*{hourlyPrice}"
+                       th:errorclass="is-invalid">
+                <div class="invalid-feedback" th:errors="*{hourlyPrice}"></div>
+            </div>
+            <div class="col-md-4">
+                <label for="city" class="form-label">City</label>
+                <input type="text" class="form-control" th:field="*{city}" th:errorclass="is-invalid">
+                <div class="invalid-feedback" th:errors="*{city}"></div>
+            </div>
+            <div class="col-12">
+                <span class="form-label d-block">Sports</span>
+                <!-- th:field on a Set: the coach's current sports are already checked -->
+                <div class="form-check form-check-inline" th:each="sport : ${sports}">
+                    <input type="checkbox" class="form-check-input" th:field="*{sportIds}" th:value="${sport.id}">
+                    <label class="form-check-label" th:for="${#ids.prev('sportIds')}"
+                           th:text="${sport.name}">Tennis</label>
+                </div>
+                <div class="text-danger small" th:if="${#fields.hasErrors('sportIds')}"
+                     th:errors="*{sportIds}"></div>
+            </div>
+            <div class="col-12">
+                <label for="bio" class="form-label">About you</label>
+                <textarea class="form-control" rows="6" th:field="*{bio}" th:errorclass="is-invalid"></textarea>
+                <div class="invalid-feedback" th:errors="*{bio}"></div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-4">Save</button>
+    </form>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

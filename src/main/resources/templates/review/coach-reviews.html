@@ -17,7 +17,8 @@
         <p class="fs-5 mb-4">
             <span class="text-warning">★</span>
             <strong th:text="${#numbers.formatDecimal(coachReviews.averageRating, 1, 1)}">4.5</strong>
-            <span class="text-muted" th:text="'(' + ${coachReviews.reviews.size()} + ' reviews)'">(2 reviews)</span>
+            <span class="text-muted"
+                  th:text="'(' + ${coachReviews.reviews.size()} + (${coachReviews.reviews.size() == 1} ? ' review)' : ' reviews)')">(2 reviews)</span>
         </p>
 
         <div th:each="r : ${coachReviews.reviews}" class="card mb-3">

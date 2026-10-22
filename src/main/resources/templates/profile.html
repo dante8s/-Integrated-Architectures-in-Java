@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{fragments/layout :: head('My page')}"></head>
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
@@ -9,6 +10,7 @@
     <div th:if="${welcome}" class="alert alert-success">
         Registration complete! Welcome to SportCoach.
     </div>
+    <div th:if="${success}" class="alert alert-success" th:text="${success}">Saved</div>
 
     <h1 class="mb-4" th:text="'Hi, ' + ${me.firstName} + '!'">Hi, Name!</h1>
 
@@ -19,11 +21,33 @@
         <dd class="col-sm-9" th:text="${me.role}">STUDENT</dd>
     </dl>
 
+    <!-- Quick links by role -->
+    <div class="mb-4">
+        <a sec:authorize="hasRole('STUDENT')" th:href="@{/student/bookings}" class="btn btn-primary">My bookings</a>
+        <a sec:authorize="hasRole('STUDENT')" th:href="@{/coaches}" class="btn btn-outline-primary ms-2">Find a coach</a>
+        <a sec:authorize="hasRole('COACH')" th:href="@{/coach/profile}" class="btn btn-primary">
+            Edit coach profile (price, sports, bio)</a>
+    </div>
+
+    <!-- form: ProfileForm, filled with the current name -->
     <div class="card">
         <div class="card-body">
-            <h5 class="card-title">My bookings</h5>
-            <p class="card-text text-muted">You have no bookings yet.</p>
-            <a th:href="@{/}" class="btn btn-primary">Find a coach</a>
+            <h2 class="h5 card-title">My data</h2>
+            <form th:action="@{/profile}" th:object="${form}" method="post" novalidate>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="firstName" class="form-label">First name</label>
+                        <input type="text" class="form-control" th:field="*{firstName}" th:errorclass="is-invalid">
+                        <div class="invalid-feedback" th:errors="*{firstName}"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="lastName" class="form-label">Last name</label>
+                        <input type="text" class="form-control" th:field="*{lastName}" th:errorclass="is-invalid">
+                        <div class="invalid-feedback" th:errors="*{lastName}"></div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">Save</button>
+            </form>
         </div>
     </div>
 </main>

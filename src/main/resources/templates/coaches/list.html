@@ -52,7 +52,6 @@
                     <p class="mb-1 fw-semibold" th:text="${coach.hourlyPrice} + ' / hour'">25.00 / hour</p>
                     <p class="mb-2 text-muted small">
                         <span th:text="${coach.city} ?: 'no city'">Kyiv</span>
-                        <span th:if="${coach.online}" class="badge text-bg-info ms-1">online</span>
                     </p>
                     <!-- abbreviate: cut a long bio to 120 characters with "..." -->
                     <p class="card-text small" th:if="${coach.bio}"

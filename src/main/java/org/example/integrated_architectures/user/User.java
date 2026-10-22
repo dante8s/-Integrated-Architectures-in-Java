@@ -87,6 +87,12 @@ public class User {
         this.status = status;
     }
 
+    // First and last name always change together (one "Save" on the profile page).
+    public void rename(String firstName, String lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+
     public Instant getCreatedAt() {
         return createdAt;
     }

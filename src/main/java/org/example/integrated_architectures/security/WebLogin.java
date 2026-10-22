@@ -22,15 +22,26 @@ public class WebLogin {
     private final SecurityContextRepository contextRepository = new HttpSessionSecurityContextRepository();
 
     public void logIn(User user, HttpServletRequest request, HttpServletResponse response) {
-        AppUserDetails principal = new AppUserDetails(user);
-        // The password was just set by the user, so there is nothing to check: create an authenticated token directly.
-        var authentication = UsernamePasswordAuthenticationToken.authenticated(
-                principal, null, principal.getAuthorities());
-
         // New session id after login (protection against session fixation), like the form login does.
         if (request.getSession(false) != null) {
             request.changeSessionId();
         }
+        saveInSession(user, request, response);
+    }
+
+    /**
+     * The user changed their data (e.g. the name): AppUserDetails in the session is a COPY made at login,
+     * so it must be replaced, otherwise the navbar would show the old name until the next login.
+     */
+    public void refresh(User user, HttpServletRequest request, HttpServletResponse response) {
+        saveInSession(user, request, response);
+    }
+
+    private void saveInSession(User user, HttpServletRequest request, HttpServletResponse response) {
+        AppUserDetails principal = new AppUserDetails(user);
+        // The user is already known, so there is nothing to check: create an authenticated token directly.
+        var authentication = UsernamePasswordAuthenticationToken.authenticated(
+                principal, null, principal.getAuthorities());
 
         SecurityContext context = contextHolder.createEmptyContext();
         context.setAuthentication(authentication);

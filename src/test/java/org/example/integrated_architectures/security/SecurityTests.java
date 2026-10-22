@@ -86,6 +86,16 @@ class SecurityTests {
                 .andExpect(authenticated().withRoles("STUDENT"));
     }
 
+    // LoginSuccessHandler: after login every role gets its own start page, not "/".
+    @Test
+    void activeCoachGoesToCoachProfileAfterLogin() throws Exception {
+        saveUser("coach@test.local", Role.COACH, UserStatus.ACTIVE);
+
+        mockMvc.perform(formLogin("/login").user("email", "coach@test.local").password(PASSWORD))
+                .andExpect(authenticated().withRoles("COACH"))
+                .andExpect(redirectedUrl("/coach/profile"));
+    }
+
     @Test
     void pendingCoachCannotLogIn() throws Exception {
         saveUser("coach@test.local", Role.COACH, UserStatus.PENDING);

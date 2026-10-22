@@ -18,6 +18,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain webSecurityFilterChain(HttpSecurity http,
+                                                     LoginSuccessHandler loginSuccessHandler,
                                                      LoginFailureHandler loginFailureHandler) throws Exception {
         http
                 // Rules are checked top to bottom, the first matching one wins.
@@ -39,6 +40,7 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/login")              // our own page instead of the generated one
                         .usernameParameter("email")       // name of the input in login.html
+                        .successHandler(loginSuccessHandler)   // page by role instead of "/"
                         .failureHandler(loginFailureHandler)
                         .permitAll())
                 // POST /logout (with CSRF token) -> redirect to /login?logout
