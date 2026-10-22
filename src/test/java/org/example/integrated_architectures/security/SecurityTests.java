@@ -71,6 +71,13 @@ class SecurityTests {
         mockMvc.perform(get("/coach/slots")).andExpect(status().isForbidden());
     }
 
+    // Booking is for students only: /student/** is for ROLE_STUDENT.
+    @Test
+    @WithMockUser(roles = "COACH")
+    void coachGetsForbiddenOnStudentPages() throws Exception {
+        mockMvc.perform(get("/student/bookings")).andExpect(status().isForbidden());
+    }
+
     @Test
     void activeStudentCanLogIn() throws Exception {
         saveUser("student@test.local", Role.STUDENT, UserStatus.ACTIVE);

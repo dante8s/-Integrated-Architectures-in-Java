@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,4 +31,22 @@ public interface AvailabilitySlotRepository extends JpaRepository<AvailabilitySl
 
     // WHERE id = ? AND coach.user.id = ? - another coach's slot is "not found" (used by delete).
     Optional<AvailabilitySlot> findByIdAndCoachUserId(Long id, Long userId);
+
+    /**
+     * Slots a student can book: in the future and without an active (PENDING/CONFIRMED) booking.
+     * NOT EXISTS: a slot with only CANCELLED bookings is free again.
+     * By coach PROFILE id, because the public page /coaches/{id}/slots uses the profile id.
+     */
+    @Query("""
+            SELECT s FROM AvailabilitySlot s
+            WHERE s.coach.id = :coachId
+              AND s.startsAt > :now
+              AND NOT EXISTS (
+                  SELECT b FROM Booking b
+                  WHERE b.slot = s AND b.status IN :activeStatuses)
+            ORDER BY s.startsAt
+            """)
+    List<AvailabilitySlot> findFree(@Param("coachId") Long coachId,
+                                    @Param("now") LocalDateTime now,
+                                    @Param("activeStatuses") Collection<BookingStatus> activeStatuses);
 }

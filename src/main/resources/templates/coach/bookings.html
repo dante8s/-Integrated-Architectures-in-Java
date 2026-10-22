@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Booking requests')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5" style="max-width: 1000px">
+    <h1 class="mb-4">Booking requests</h1>
+
+    <!-- Flash attributes from CoachBookingController -->
+    <div th:if="${success}" class="alert alert-success" th:text="${success}">Done</div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}">Error</div>
+
+    <p th:if="${bookings.isEmpty()}" class="text-muted">
+        No bookings yet. <a th:href="@{/coach/slots}">Add free slots</a> so students can book you.
+    </p>
+
+    <!-- bookings: List<CoachBookingView> -->
+    <table th:unless="${bookings.isEmpty()}" class="table align-middle">
+        <thead>
+        <tr>
+            <th>Student</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Status</th>
+            <th class="text-end">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="b : ${bookings}">
+            <td th:text="${b.studentName}">Olena Koval</td>
+            <td th:text="${#temporals.format(b.startsAt, 'EEE, dd.MM.yyyy')}">Mon, 20.10.2026</td>
+            <td th:text="${#temporals.format(b.startsAt, 'HH:mm')} + ' - ' + ${#temporals.format(b.endsAt, 'HH:mm')}">10:00 - 11:00</td>
+            <td>
+                <th:block th:switch="${b.status.name()}">
+                    <span th:case="'PENDING'" class="badge text-bg-warning">new request</span>
+                    <span th:case="'CONFIRMED'" class="badge text-bg-success">confirmed</span>
+                    <span th:case="'CANCELLED'" class="badge text-bg-secondary">cancelled</span>
+                    <span th:case="'COMPLETED'" class="badge text-bg-primary">completed</span>
+                </th:block>
+            </td>
+            <td class="text-end">
+                <!-- th:block groups the PENDING buttons under one th:if and leaves no extra tag in the HTML -->
+                <th:block th:if="${b.canAnswer}">
+                    <form th:action="@{/coach/bookings/{id}/confirm(id=${b.id})}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-success">Confirm</button>
+                    </form>
+                    <form th:action="@{/coach/bookings/{id}/decline(id=${b.id})}" method="post" class="d-inline"
+                          onsubmit="return confirm('Decline this booking?');">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Decline</button>
+                    </form>
+                </th:block>
+                <form th:if="${b.canComplete}"
+                      th:action="@{/coach/bookings/{id}/complete(id=${b.id})}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-sm btn-primary">Complete</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
@@ -58,6 +59,31 @@ class BookingRepositoryTests {
         // The second active booking of the same slot is rejected by the database itself.
         assertThatThrownBy(() -> bookingRepository.saveAndFlush(new Booking(slot, student3)))
                 .isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    // The student sees only future slots without an active booking (AvailabilitySlotRepository.findFree).
+    @Test
+    void onlyFutureNotBookedSlotsAreFree() {
+        User coachUser = userRepository.save(
+                new User("coach@test.local", "hash", "Coach", "Test", Role.COACH, UserStatus.ACTIVE));
+        CoachProfile coach = coachProfileRepository.save(new CoachProfile(coachUser, 3, new BigDecimal("20.00")));
+        LocalDateTime tomorrow = LocalDateTime.now().plusDays(1);
+        AvailabilitySlot free = slotRepository.save(new AvailabilitySlot(coach, tomorrow, tomorrow.plusHours(1)));
+        AvailabilitySlot booked = slotRepository.save(
+                new AvailabilitySlot(coach, tomorrow.plusHours(2), tomorrow.plusHours(3)));
+        AvailabilitySlot freedAgain = slotRepository.save(
+                new AvailabilitySlot(coach, tomorrow.plusHours(4), tomorrow.plusHours(5)));
+        LocalDateTime yesterday = LocalDateTime.now().minusDays(1);
+        slotRepository.save(new AvailabilitySlot(coach, yesterday, yesterday.plusHours(1)));   // past
+
+        User student = saveStudent("student@test.local");
+        bookingRepository.save(new Booking(booked, student));                                   // PENDING
+        Booking cancelled = new Booking(freedAgain, student);
+        cancelled.setStatus(BookingStatus.CANCELLED);
+        bookingRepository.save(cancelled);
+
+        assertThat(slotRepository.findFree(coach.getId(), LocalDateTime.now(), BookingService.ACTIVE_STATUSES))
+                .containsExactly(free, freedAgain);
     }
 
     private User saveStudent(String email) {

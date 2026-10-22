@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('My bookings')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5" style="max-width: 900px">
+    <h1 class="mb-4">My bookings</h1>
+
+    <!-- Flash attributes from StudentBookingController -->
+    <div th:if="${success}" class="alert alert-success" th:text="${success}">Done</div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}">Error</div>
+
+    <p th:if="${bookings.isEmpty()}" class="text-muted">
+        No bookings yet. <a th:href="@{/coaches}">Find a coach</a>.
+    </p>
+
+    <!-- bookings: List<StudentBookingView> -->
+    <table th:unless="${bookings.isEmpty()}" class="table align-middle">
+        <thead>
+        <tr>
+            <th>Coach</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Status</th>
+            <th class="text-end">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="b : ${bookings}">
+            <td><a th:href="@{/coaches/{id}(id=${b.coachId})}" th:text="${b.coachName}">Ivan Petrenko</a></td>
+            <td th:text="${#temporals.format(b.startsAt, 'EEE, dd.MM.yyyy')}">Mon, 20.10.2026</td>
+            <td th:text="${#temporals.format(b.startsAt, 'HH:mm')} + ' - ' + ${#temporals.format(b.endsAt, 'HH:mm')}">10:00 - 11:00</td>
+            <td>
+                <!-- th:switch on the enum's name: a different badge colour for each status -->
+                <th:block th:switch="${b.status.name()}">
+                    <span th:case="'PENDING'" class="badge text-bg-warning">waiting for coach</span>
+                    <span th:case="'CONFIRMED'" class="badge text-bg-success">confirmed</span>
+                    <span th:case="'CANCELLED'" class="badge text-bg-secondary">cancelled</span>
+                    <span th:case="'COMPLETED'" class="badge text-bg-primary">completed</span>
+                </th:block>
+            </td>
+            <td class="text-end">
+                <form th:if="${b.cancellable}"
+                      th:action="@{/student/bookings/{id}/cancel(id=${b.id})}" method="post"
+                      class="d-inline"
+                      onsubmit="return confirm('Cancel this booking?');">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
+                </form>
+                <!-- A plain link: opening the form is a GET. An already reviewed lesson -> flash error. -->
+                <a th:if="${b.status.name() == 'COMPLETED'}"
+                   th:href="@{/student/bookings/{id}/review(id=${b.id})}"
+                   class="btn btn-sm btn-outline-primary">Leave a review</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

@@ -34,6 +34,11 @@ public class SlotService {
         return slotRepository.findByCoachUserIdAndStartsAtAfterOrderByStartsAtAsc(coachUserId, LocalDateTime.now());
     }
 
+    // For students: future slots of a coach that nobody has booked yet. coachId = coach PROFILE id.
+    public List<AvailabilitySlot> findFree(Long coachId) {
+        return slotRepository.findFree(coachId, LocalDateTime.now(), BookingService.ACTIVE_STATUSES);
+    }
+
     @Transactional
     public AvailabilitySlot create(Long coachUserId, SlotForm form) {
         LocalDateTime startsAt = form.getStartsAt();

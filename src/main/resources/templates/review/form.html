@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Leave a review')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5" style="max-width: 600px">
+    <a th:href="@{/student/bookings}" class="d-inline-block mb-3">&larr; Back to my bookings</a>
+
+    <h1 class="h2 mb-1">Leave a review</h1>
+    <!-- target: ReviewTarget (which lesson is reviewed) -->
+    <p class="text-muted mb-4"
+       th:text="'Lesson with ' + ${target.coachName} + ' on ' + ${#temporals.format(target.lessonDate, 'dd.MM.yyyy HH:mm')}">
+        Lesson with Ivan Petrenko on 20.10.2026 10:00</p>
+
+    <form th:action="@{/student/bookings/{id}/review(id=${target.bookingId})}" th:object="${form}"
+          method="post" novalidate>
+        <div class="mb-3">
+            <label for="rating" class="form-label">Rating</label>
+            <select class="form-select" th:field="*{rating}" th:errorclass="is-invalid">
+                <option value="">Choose...</option>
+                <!-- #numbers.sequence(5, 1) = 5, 4, 3, 2, 1; #strings.repeat draws the stars -->
+                <option th:each="n : ${#numbers.sequence(5, 1)}" th:value="${n}"
+                        th:text="${#strings.repeat('★', n)} + ' (' + ${n} + ')'">★★★★★ (5)</option>
+            </select>
+            <div class="invalid-feedback" th:errors="*{rating}"></div>
+        </div>
+        <div class="mb-3">
+            <label for="comment" class="form-label">Comment <span class="text-muted">(optional)</span></label>
+            <textarea class="form-control" rows="4" maxlength="1000" th:field="*{comment}"
+                      th:errorclass="is-invalid"></textarea>
+            <div class="invalid-feedback" th:errors="*{comment}"></div>
+        </div>
+        <button type="submit" class="btn btn-primary">Send review</button>
+    </form>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

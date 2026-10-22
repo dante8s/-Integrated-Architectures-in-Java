@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -36,6 +37,13 @@ public class BookingService {
     }
 
     // ---------- student ----------
+
+    public List<StudentBookingView> findStudentBookings(Long studentUserId) {
+        LocalDateTime now = LocalDateTime.now();
+        return bookingRepository.findByStudentIdOrderBySlotStartsAtDesc(studentUserId).stream()
+                .map(booking -> StudentBookingView.from(booking, canStudentCancel(booking, now)))
+                .toList();
+    }
 
     @Transactional
     public Booking book(Long studentUserId, Long slotId) {
@@ -73,6 +81,15 @@ public class BookingService {
 
     // ---------- coach ----------
 
+    public List<CoachBookingView> findCoachBookings(Long coachUserId) {
+        LocalDateTime now = LocalDateTime.now();
+        return bookingRepository.findBySlotCoachUserIdOrderBySlotStartsAtDesc(coachUserId).stream()
+                .map(booking -> CoachBookingView.from(booking,
+                        booking.getStatus() == BookingStatus.PENDING,   // the same rule as confirm()/decline()
+                        canCoachComplete(booking, now)))
+                .toList();
+    }
+
     @Transactional
     public void confirm(Long coachUserId, Long bookingId) {
         Booking booking = findCoachBooking(coachUserId, bookingId);
@@ -100,6 +117,19 @@ public class BookingService {
     }
 
     // ---------- helpers ----------
+
+    // The same rule as in cancel(), but as a yes/no answer for the page (show the button or not).
+    // cancel() still checks it again: a request can come without the button (e.g. an old page).
+    private static boolean canStudentCancel(Booking booking, LocalDateTime now) {
+        return ACTIVE_STATUSES.contains(booking.getStatus())
+                && booking.getSlot().getStartsAt().isAfter(now);
+    }
+
+    // The same rule as in complete(): a confirmed lesson that has already ended.
+    private static boolean canCoachComplete(Booking booking, LocalDateTime now) {
+        return booking.getStatus() == BookingStatus.CONFIRMED
+                && booking.getSlot().getEndsAt().isBefore(now);
+    }
 
     // A booking of one of this coach's slots; someone else's booking -> 404.
     private Booking findCoachBooking(Long coachUserId, Long bookingId) {

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Reviews · ' + ${coach.fullName})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5" style="max-width: 800px">
+    <a th:href="@{/coaches/{id}(id=${coach.id})}" class="d-inline-block mb-3">&larr; Back to the coach</a>
+
+    <h1 class="h2 mb-1" th:text="'Reviews of ' + ${coach.fullName}">Reviews of Ivan Petrenko</h1>
+
+    <!-- coachReviews: CoachReviews (list + average) -->
+    <p th:if="${coachReviews.reviews.isEmpty()}" class="text-muted">No reviews yet.</p>
+
+    <th:block th:unless="${coachReviews.reviews.isEmpty()}">
+        <!-- #numbers.formatDecimal(value, min integer digits, decimal digits) -> "4.5" -->
+        <p class="fs-5 mb-4">
+            <span class="text-warning">★</span>
+            <strong th:text="${#numbers.formatDecimal(coachReviews.averageRating, 1, 1)}">4.5</strong>
+            <span class="text-muted" th:text="'(' + ${coachReviews.reviews.size()} + ' reviews)'">(2 reviews)</span>
+        </p>
+
+        <div th:each="r : ${coachReviews.reviews}" class="card mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <!-- filled stars for the rating, empty ones up to 5 -->
+                    <span class="text-warning"
+                          th:text="${#strings.repeat('★', r.rating)} + ${#strings.repeat('☆', 5 - r.rating)}">★★★★☆</span>
+                    <small class="text-muted"
+                           th:text="${r.studentFirstName} + ', lesson on ' + ${#temporals.format(r.lessonDate, 'dd.MM.yyyy')}">
+                        Olena, lesson on 20.10.2026</small>
+                </div>
+                <!-- pre-line keeps the line breaks the student typed -->
+                <p th:if="${r.comment}" th:text="${r.comment}" class="mb-0 mt-2" style="white-space: pre-line">Great coach!</p>
+            </div>
+        </div>
+    </th:block>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

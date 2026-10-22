@@ -34,7 +34,11 @@
             <p th:if="${coach.bio}" th:text="${coach.bio}" style="white-space: pre-line">Full bio</p>
             <p th:unless="${coach.bio}" class="text-muted">The coach hasn't written about themselves yet.</p>
 
-            <!-- Step 7: free slots + "Book" button, then reviews -->
+            <!-- Free slots are on a separate page of the booking/ package (StudentBookingController) -->
+            <a th:href="@{/coaches/{id}/slots(id=${coach.id})}" class="btn btn-primary">See free time and book</a>
+
+            <!-- Reviews are on a separate page of the review/ package (ReviewController) -->
+            <a th:href="@{/coaches/{id}/reviews(id=${coach.id})}" class="btn btn-outline-secondary ms-2">Reviews</a>
         </div>
     </div>
 </main>

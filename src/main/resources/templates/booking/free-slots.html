@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Free time · ' + ${coach.fullName})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5" style="max-width: 800px">
+    <a th:href="@{/coaches/{id}(id=${coach.id})}" class="d-inline-block mb-3">&larr; Back to the coach</a>
+
+    <h1 class="h2 mb-1" th:text="'Free time of ' + ${coach.fullName}">Free time of Ivan Petrenko</h1>
+    <p class="text-muted mb-4" th:text="${coach.hourlyPrice} + ' / hour'">25.00 / hour</p>
+
+    <!-- Flash from StudentBookingController.book (e.g. the slot was just taken by someone else) -->
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}">Error</div>
+
+    <!-- Guests see the slots, but booking needs a student account -->
+    <div sec:authorize="isAnonymous()" class="alert alert-info">
+        <a th:href="@{/login}">Log in</a> as a student to book a lesson.
+    </div>
+
+    <p th:if="${slots.isEmpty()}" class="text-muted">No free time right now. Check again later.</p>
+
+    <table th:unless="${slots.isEmpty()}" class="table align-middle">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Time</th>
+            <th class="text-end" sec:authorize="hasRole('STUDENT')"></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="slot : ${slots}">
+            <td th:text="${#temporals.format(slot.startsAt, 'EEE, dd.MM.yyyy')}">Mon, 20.10.2026</td>
+            <td th:text="${#temporals.format(slot.startsAt, 'HH:mm')} + ' - ' + ${#temporals.format(slot.endsAt, 'HH:mm')}">10:00 - 11:00</td>
+            <td class="text-end" sec:authorize="hasRole('STUDENT')">
+                <!-- Hidden fields: which slot to book, and where to come back after an error -->
+                <form th:action="@{/student/bookings}" method="post" class="d-inline">
+                    <input type="hidden" name="slotId" th:value="${slot.id}">
+                    <input type="hidden" name="coachId" th:value="${coach.id}">
+                    <button type="submit" class="btn btn-sm btn-primary">Book</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

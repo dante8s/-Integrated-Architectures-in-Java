@@ -23,13 +23,16 @@ public class SecurityConfig {
                 // Rules are checked top to bottom, the first matching one wins.
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/register/**", "/login", "/error").permitAll()
-                        // Public catalog: guests can browse coaches. "/coaches/*" = one level only,
-                        // so future actions like /coaches/{id}/book will still need a login.
-                        .requestMatchers(HttpMethod.GET, "/coaches", "/coaches/*").permitAll()
+                        // Public catalog: guests can browse coaches, their free time and reviews (GET only).
+                        // Booking and writing a review are under /student/** and need a login.
+                        .requestMatchers(HttpMethod.GET,
+                                "/coaches", "/coaches/*", "/coaches/*/slots", "/coaches/*/reviews").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         // "/coach/**" (coach's own pages) is not "/coaches/**" (public catalog).
                         .requestMatchers("/coach/**").hasRole("COACH")
+                        // Booking and "My bookings": students only (a coach can't book another coach).
+                        .requestMatchers("/student/**").hasRole("STUDENT")
                         // Must be the last rule: everything not listed above needs a logged-in user.
                         .anyRequest().authenticated()
                 )
